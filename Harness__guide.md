@@ -33,3 +33,97 @@
     - 테스트 통과할 떄까지 자동 반복 - 하네스의 심장
 4. 워커 격리 : 역할 분리
     - 코드 작성 AI와 코드 검토 AI 확실한 역할 분리
+
+# oh-my-claudecode
+- AI를 팀처럼 굴리는 범용 하네스 (오픈소스)
+- https://github.com/Yeachan-Heo/oh-my-claudecode.git
+- 19개 전문 에이전트 : 설계, 코딩, 테스트, 리서치 등 역할별로 분리된 AI 팀
+- 자동 파이프라인 : 단계별 자동 진행, 순서 건너뛰기 불가
+- 37개+ 스킬 : 반복 작업을 명령어 하나로 실행
+- 모니터링 + 비용 추적 : 실시간 대시보드, 토큰 비용, 스마트 모델 라우팅
+
+# 커스텀 하네스 프레임워크 구조
+project/
+├── CLAUDE.md                    ← 프로젝트 헌법
+├── docs/
+│   ├── PRD.md                   ← 뭘 만드는지
+│   ├── ARCHITECTURE.md          ← 어떻게 만드는지
+│   ├── ADR.md                   ← 왜 이렇게 만드는지
+│   └── UI_GUIDE.md              ← 어떻게 보여야 하는지 (선택)
+├── .claude/
+│   ├── commands/
+│   │   ├── harness.md           ← /harness — 원스톱 실행
+│   │   └── review.md            ← /review — 규칙 기반 리뷰
+│   └── settings.json            ← hooks 설정
+├── scripts/
+│   ├── execute.py               ← Phase 순차 실행 + 상태 관리
+│   └── hooks/
+│       ├── tdd-guard.sh         ← 테스트 없으면 구현 차단
+│       ├── dangerous-cmd-guard.sh ← 위험 명령어 차단
+│       └── circuit-breaker.sh   ← 반복 에러 감지
+└── phases/                      ← Phase 파일 + 실행 상태
+
+# Layer 1 : docs/ - 프로젝트의 뇌
+- PRD.md : 뭘 만드는지
+    - Product Requirements Document. 핵심 기능과 MVP 제외 사항을 정의
+    - 템플릿 : 목표 - 핵심 기능 - MVP 제외 사항
+    - MVP 제외 사항이 매우 중요합니다. 이걸 안 써놓으면 AI가 "이 기능도 추가할까요?" 하면서 scope가 끝없이 늘어납니다. "이건 안 만든다"를 명시하는 게 "이건 만든다"보다A 더 중요할 때가 많습니다.
+- ARCHITECTURE.md : 어떻게 만드는지
+    - 디렉토리 구조, 디자인 패턴, 데이터 흐름을 정의
+    - 템플릿 : 디렉토리 구조 - 패턴 - 데이터 흐름
+- ADR.md : 왜 이렇게 만드는지
+    - Architecture Decision Records. "뭘 선택했고, 왜 선택했고, 뭘 포기했는지" 
+    - 템플릿 : ADR 001 - 결정 - 이유 - 트레이드오프 / ADR 002 - ~
+    - 트레이드오프가 핵심. 예: "Recharts를 선택했다. D3.js 대비 커스터마이징이 제한되지만 대시보드 수준에서는 충분하다" → AI가 나중에 "D3.js로 바꿀까요?" 같은 제안을 하지 않습니다.
+- UI_GUIDE.md : 어떻게 보여야 하는지
+    - 색상 팔레트, 컴포넌트 패턴, AI 슬롭 안티패턴(glass morphism 남용, 보라색 그라데이션 텍스트, 네온 글로우 등)을 명시
+
+# Layer 2 : CLAUDE.md - 프로젝트의 헌법
+- AI가 코딩할 때 제일 먼저 읽는 파일
+- 템플릿 : 기술 스택 - 아키텍처 규칙 - 개발 프로세스 - 명령어
+- CRITICAL 키워드 : AI가 우선순위 신호로 인식하여 일반 규칙보다 훨씬 강하게 따릅니다
+- TDD 규칙 : "테스트를 먼저 작성하라" 하나만 넣어도 코드 품질이 크게 올라갑니다
+
+# Layer 3 : 실행 엔진 - /harness + execute.py
+- /harness 스킬 : .claude/commands/harness.md에 정의된 원스톱 실행 스킬입니다. Claude Code에서 /harness를 입력하면 실행됩니다.
+- /harness 실행 흐름 :
+    1. docs/문서를 전부 읽는다
+    2. 사용자와 논의 - 구체화
+    3. 구현 계획을 Phase로 쪼갠다
+    4. Phase 파일 생성
+    5. execute.py 실행
+- 내가 할 일은 docs/ 채우고 /harness 치는 것뿐. 나머지는 프레임워크가 알아서.
+
+- execute.py : scripts/execute.py는 Phase를 순차적으로 실행하는 자동화 스크립트
+- 동작 방식 :
+    1. `phases/{task-name}/` 폴더에서 다음 pending Phase를 찾는다
+    2. Phase 파일 내용을 읽어서 Claude에게 넘긴다 (`claude -p` 헤드리스 모드)
+    3. Claude가 작업을 완료하면 상태를 체크한다 (completed, error, blocked)
+- 헤드리스 모드(claude -p)
+    - Claude Code의 자동화 전용 모드
+    - 프롬프트를 텍스트로 넘기면 CLaude가 알아서 실행하고 결과를 돌려준다.
+
+- /review 스킬 : 프로젝트 규칙에 맞춰 자동 리뷰해주는 스킬
+    1. ARCHITECTURE.md 폴더 구조 준수 여부
+    2. ADR 기술 스택 준수 여부
+    3. 테스트 작성 여부
+    4. CLAUDE.md CRITICAL 규칙 준수 여부
+
+# Layer 4 : Hooks - 자동 검증 장치
+- .claude/settings.json에 설정하는 자동 검증 스크립트
+1. TDD Guard : 구현 파일 수정 시 해당 테스트가 없으면 수정을 차단
+2. Dangerous Command Guard : rm -rf, force push, git reset --hard 등 위험 명령어 차단
+3. Circuit Breaker : 깊은 에러가 60초 안에 5번 반복되면 전략 변경 경고
+
+# 전체 워크플로우
+1. 클론 + 셋업
+2. docs/ 채우기 (AI와 함께)
+3. CLAUDE.md에 CRITICAL 규칙 추가
+4. 환경변수 설정
+5. /harness 실행
+6. execute.py로 자동 실행 (optional)(별도로 Phase만 다시 실행하고 싶을 때)
+7. 리뷰 + 개선
+
+# 핵심 교훈 
+- 하네스에 뭘 넣느냐 = 결과의 품질
+- docs가 얕으면 결과도 얕다
