@@ -126,7 +126,7 @@ end
 xlabel('\omega (rad/s)', 'FontSize',12);
 ylabel('F_T (N)', 'FontSize',12);
 title('문제 2: 전달력 vs 입력주파수 — m 변화  (c=50 N·s/m, k=5000 N/m)', 'FontSize',12);
-legend('Location','northwest','FontSize',10); grid on;
+legend('Location','northeast','FontSize',10); grid on;
 saveas(fig, fullfile(fig_dir, 'p2_vary_m.png'));
 fprintf('  → p2_vary_m.png 저장\n\n');
 
@@ -156,7 +156,7 @@ end
 xlabel('\omega (rad/s)', 'FontSize',12);
 ylabel('F_T (N)', 'FontSize',12);
 title('문제 2: 전달력 vs 입력주파수 — c 변화  (m=5 kg, k=5000 N/m)', 'FontSize',12);
-legend('Location','northwest','FontSize',10); grid on;
+legend('Location','northeast','FontSize',10); grid on;
 saveas(fig, fullfile(fig_dir, 'p2_vary_c.png'));
 fprintf('  → p2_vary_c.png 저장\n\n');
 
@@ -186,7 +186,7 @@ end
 xlabel('\omega (rad/s)', 'FontSize',12);
 ylabel('F_T (N)', 'FontSize',12);
 title('문제 2: 전달력 vs 입력주파수 — k 변화  (m=5 kg, c=50 N·s/m)', 'FontSize',12);
-legend('Location','northwest','FontSize',10); grid on;
+legend('Location','northeast','FontSize',10); grid on;
 saveas(fig, fullfile(fig_dir, 'p2_vary_k.png'));
 fprintf('  → p2_vary_k.png 저장\n\n');
 
