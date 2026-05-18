@@ -30,3 +30,13 @@
 - Stop : 에이전트 턴 종료 시. 최종 정리, 보고서 생성, 상태 저장
 
 - 주의 : Hook 실행 중 Claude는 멈춰서 기다립니다. timeout을 꼭 설정하고, 무거운 작업은 백그라운드(&)로 돌리세요.
+
+# 실용 Hook 4가지
+- Link, Test, Build
+   - git commit 직전에 자동으로 lint/test/build 실행. 하나라고 실패하면 commit 차단
+- Sub-Agent PR Review
+   - commit 직전 별도 sub-agent가 diff 리뷰 - 자기 코드 편향 없음. 보안/성능/컨벤션 위반만 잡음
+- TDD 강제
+   - AI가 src/에 코드 쓰기 전 - 같은 모듈에 .test.ts 있는지 확인. 없으면 차단
+- 회사 패턴 Deny List
+   - 회사에서 일어난 모든 장애 패턴을 deny list로. AI가 시도하면 즉시 차단 + 시니어 알림

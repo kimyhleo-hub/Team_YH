@@ -1,0 +1,35 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NonInteractive -File scripts/hooks/leakage-guard.ps1"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NonInteractive -File scripts/hooks/data-guard.ps1"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NonInteractive -Command \"Write-Host '' ; Write-Host '[Performance Agent] 실험 결과를 context.md 이력 테이블에 기록했는지 확인하세요.' -ForegroundColor Yellow\""
+          }
+        ]
+      }
+    ]
+  }
+}

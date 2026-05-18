@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(claude-api)",
+      "PowerShell(New-Item *)",
+      "PowerShell(Set-Location \"C:\\\\Users\\\\kimyh\\\\Desktop\\\\Team_YH\\\\Career_Agent\"; $python = \\(Get-ChildItem -Path \"venv\" -Recurse -Filter \"python.exe\" | Select-Object -First 1\\).FullName; Write-Host \"Python: $python\"; if \\($python\\) { & $python -c \"from agents.career import CareerAgent; from agents.spec_manager import SpecManagerAgent; from agents.company_analysis import CompanyAnalysisAgent; print\\('All imports OK'\\)\" })",
+      "mcp__claude_ai_Notion__notion-get-users",
+      "mcp__claude_ai_Notion__notion-search",
+      "mcp__claude_ai_Notion__notion-fetch",
+      "mcp__claude_ai_Notion__notion-create-pages",
+      "mcp__claude_ai_Notion__notion-create-database",
+      "mcp__claude_ai_Notion__notion-update-page"
+    ]
+  }
+}
